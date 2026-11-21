@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VoltCalc Pro | Off-Grid Solar, LiFePO4 Battery &amp; EV Charging Calculators</title>
+  <meta name="description" content="Free engineering-grade off-grid solar, LiFePO4 battery bank sizing, MPPT array, pure sine wave inverter, DC wire gauge voltage drop, and EV home charger ROI calculators for US &amp; UK homeowners." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              900: '#064e3b',
+            },
+            slatebg: '#f8fafc',
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-emerald-100 selection:text-emerald-900 flex flex-col min-h-screen">
+
+  <!-- Top Navigation Bar -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 gap-3">
+        <!-- Brand Logo -->
+        <a href="#battery-sizing" onclick="switchTool('battery-sizing', event)" class="flex items-center gap-2.5 group shrink-0">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <div>
+            <span class="font-extrabold text-lg tracking-tight text-slate-900">VoltCalc<span class="text-emerald-600">Pro</span></span>
+            <span class="hidden sm:block text-[11px] font-medium text-slate-500 -mt-1">Solar, Battery &amp; EV Engineering Hub</span>
+          </div>
+        </a>
+
+        <!-- Global Currency & Region Switcher -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <div class="inline-flex items-center rounded-xl bg-slate-100 p-1 border border-slate-200" role="group" aria-label="Currency Selector">
+            <button type="button" id="btn-usd" onclick="setCurrency('USD')" class="px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg transition-all bg-white text-slate-900 shadow-sm">
+              🇺🇸 USD ($)
+            </button>
+            <button type="button" id="btn-gbp" onclick="setCurrency('GBP')" class="px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-600 hover:text-slate-900">
+              🇬🇧 GBP (£)
+            </button>
+          </div>
+
+          <button type="button" onclick="copyShareUrl()" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 active:scale-95 transition">
+            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            </svg>
+            <span class="hidden md:inline">Share Tool</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 6-Tool Cluster Tab Strip (Scrollable on Mobile, Grid on Desktop) -->
+      <nav aria-label="Calculator Suite" class="flex items-center gap-1.5 overflow-x-auto py-2.5 border-t border-slate-100 no-scrollbar">
+        <a href="#battery-sizing" data-tab="battery-sizing" onclick="switchTool('battery-sizing', event)" class="tool-tab shrink-0 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-emerald-600 text-white shadow-sm">
+          1. LiFePO4 Battery Bank
+        </a>
+        <a href="#solar-array" data-tab="solar-array" onclick="switchTool('solar-array', event)" class="tool-tab shrink-0 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+          2. Solar Panel Array
+        </a>
+        <a href="#inverter-sizing" data-tab="inverter-sizing" onclick="switchTool('inverter-sizing', event)" class="tool-tab shrink-0 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+          3. Pure Sine Inverter
+        </a>
+        <a href="#wire-gauge" data-tab="wire-gauge" onclick="switchTool('wire-gauge', event)" class="tool-tab shrink-0 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+          4. DC Wire Gauge &amp; Drop
+        </a>
+        <a href="#ev-charging" data-tab="ev-charging" onclick="switchTool('ev-charging', event)" class="tool-tab shrink-0 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+          5. EV Charger Savings
+        </a>
+        <a href="#solar-roi" data-tab="solar-roi" onclick="switchTool('solar-roi', event)" class="tool-tab shrink-0 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+          6. Solar + Battery ROI
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Toast Notification (Replaces alert()) -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden items-center gap-2.5 bg-slate-900 text-white text-xs sm:text-sm font-medium px-4 py-3 rounded-xl shadow-lg border border-slate-700">
+    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+    <span id="toast-msg">Link copied to clipboard!</span>
+  </div>
+
+  <!-- AdSense Leaderboard Slot #1 (Fixed min-height prevents CLS layout shift) -->
+  <div class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-4">
+    <div class="w-full min-h-[90px] sm:min-h-[100px] bg-slate-100/90 border border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center text-center p-3">
+      <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Advertisement · Reserved Display Slot (728×90 / Responsive)</span>
+      <span class="text-xs text-slate-400 mt-0.5">Fixed height container prevents Cumulative Layout Shift (CLS) for Google AdSense</span>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+
+    <!-- ===================================================================== -->
+    <!-- TOOL 1: LiFePO4 BATTERY BANK SIZING CALCULATOR                        -->
+    <!-- ===================================================================== -->
+    <section id="panel-battery-sizing" class="tool-panel space-y-8">
+      <!-- Header -->
+      <div class="max-w-3xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold mb-3">
+          Off-Grid &amp; Van/RV Storage Engineering
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">LiFePO4 Battery Bank Sizing Calculator</h1>
+        <p class="mt-2 text-sm sm:text-base text-slate-600 leading-relaxed">
+          Calculate exact amp-hour (Ah) capacity, usable kilowatt-hours (kWh), series/parallel battery wiring configurations, and estimated equipment cost for 12V, 24V, and 48V solar storage banks.
+        </p>
+      </div>
+
+      <!-- Calculator Card -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- Inputs -->
+        <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-5">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h2 class="text-base font-bold text-slate-900">System Parameters</h2>
+            <button type="button" onclick="resetBatteryCalc()" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700">Reset Defaults</button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="bat-wh" class="block text-xs font-semibold text-slate-700 mb-1.5">Daily Energy Consumption (Wh/day)</label>
+              <input type="number" id="bat-wh" value="4800" min="50" max="200000" step="50" oninput="calcBattery()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none" />
+              <p class="text-[11px] text-slate-400 mt-1">Tip: 4,800 Wh = 4.8 kWh/day (typical cabin/RV)</p>
+            </div>
+
+            <div>
+              <label for="bat-volt" class="block text-xs font-semibold text-slate-700 mb-1.5">Nominal System Voltage</label>
+              <select id="bat-volt" onchange="calcBattery()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none">
+                <option value="12">12V DC (Vans, RVs, Boats)</option>
+                <option value="24">24V DC (Medium Cabins, Tiny Homes)</option>
+                <option value="48" selected>48V DC (Whole-Home Off-Grid)</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="bat-days" class="block text-xs font-semibold text-slate-700 mb-1.5">Days of Autonomy (Backup Days)</label>
+              <input type="number" id="bat-days" value="2" min="0.5" max="14" step="0.5" oninput="calcBattery()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none" />
+              <p class="text-[11px] text-slate-400 mt-1">Days without sun before battery hits min DoD</p>
+            </div>
+
+            <div>
+              <label for="bat-chem" class="block text-xs font-semibold text-slate-700 mb-1.5">Battery Chemistry &amp; Max DoD</label>
+              <select id="bat-chem" onchange="calcBattery()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none">
+                <option value="0.80" selected>LiFePO4 Lithium (80% Safe DoD)</option>
+                <option value="0.90">LiFePO4 Deep Cycle (90% Max DoD)</option>
+                <option value="0.50">AGM / Gel Lead-Acid (50% Safe DoD)</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="bat-temp" class="block text-xs font-semibold text-slate-700 mb-1.5">Lowest Ambient Temperature</label>
+              <select id="bat-temp" onchange="calcBattery()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none">
+                <option value="1.00" selected>20°C / 68°F+ (No Derating - 100%)</option>
+                <option value="1.05">10°C / 50°F (Mild Cool - 5% Buffer)</option>
+                <option value="1.15">0°C / 32°F (Freezing - 15% Buffer)</option>
+                <option value="1.25">-10°C / 14°F (Sub-Zero - 25% Buffer)</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="bat-eff" class="block text-xs font-semibold text-slate-700 mb-1.5">Inverter &amp; Wiring Efficiency (%)</label>
+              <input type="number" id="bat-eff" value="92" min="75" max="99" step="1" oninput="calcBattery()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div class="lg:col-span-5 bg-slate-900 text-white rounded-2xl p-5 sm:p-6 shadow-md space-y-5">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Recommended Bank Spec</span>
+            <span id="bat-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300">48V LiFePO4</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-slate-800/80 rounded-xl p-4 border border-slate-700/70">
+              <p class="text-xs text-slate-400">Required Capacity</p>
+              <p id="res-bat-ah" class="text-2xl sm:text-3xl font-extrabold text-emerald-400 mt-1">272 Ah</p>
+              <p id="res-bat-total-kwh" class="text-xs text-slate-300 mt-1">13.04 kWh nameplate</p>
+            </div>
+            <div class="bg-slate-800/80 rounded-xl p-4 border border-slate-700/70">
+              <p class="text-xs text-slate-400">Usable Energy</p>
+              <p id="res-bat-usable" class="text-2xl sm:text-3xl font-extrabold text-white mt-1">10.43 kWh</p>
+              <p class="text-xs text-slate-300 mt-1">At selected DoD</p>
+            </div>
+          </div>
+
+          <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/60 space-y-2.5 text-sm">
+            <div class="flex justify-between">
+              <span class="text-slate-400">12V 100Ah Module Config:</span>
+              <span id="res-bat-100ah" class="font-bold text-white">12 batteries (4S3P)</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Native 48V 100Ah Server Rack:</span>
+              <span id="res-bat-rack" class="font-bold text-emerald-300">3 × 48V 100Ah (Parallel)</span>
+            </div>
+            <div class="flex justify-between pt-2 border-t border-slate-700/70">
+              <span class="text-slate-300 font-medium">Estimated Bank Cost:</span>
+              <span id="res-bat-cost" class="font-extrabold text-lg text-amber-300">$3,130</span>
+            </div>
+          </div>
+
+          <div class="pt-1 flex items-center justify-between text-xs text-slate-400">
+            <span>Next step: Size your solar recharge array</span>
+            <a href="#solar-array" onclick="switchTool('solar-array', event)" class="text-emerald-400 font-semibold hover:underline">Solar Array Tool →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- AdSense In-Content Slot -->
+      <div class="w-full min-h-[100px] bg-slate-100/90 border border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center text-center p-3">
+        <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Advertisement · In-Article Responsive Unit</span>
+        <span class="text-xs text-slate-400 mt-0.5">High-CPC Solar &amp; LiFePO4 Battery Ad Placement</span>
+      </div>
+
+      <!-- Educational SEO Guide & FAQ -->
+      <article class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 space-y-6">
+        <h2 class="text-xl font-bold text-slate-900">How to Size an Off-Grid LiFePO4 Battery Bank (Engineering Formula)</h2>
+        <p class="text-sm text-slate-600 leading-relaxed">
+          Unlike lead-acid or AGM batteries—which suffer severe cycle-life degradation if discharged below 50%—Lithium Iron Phosphate (<strong>LiFePO4</strong>) batteries safely deliver <strong>80% to 90% Depth of Discharge (DoD)</strong> for 4,000+ cycles. However, ignoring inverter conversion losses and cold-weather voltage sag is the most common mistake in DIY off-grid builds.
+        </p>
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 font-mono text-xs sm:text-sm text-slate-800 overflow-x-auto">
+          Required Bank (Ah) = [ (Daily Wh ÷ Inverter Efficiency) × Autonomy Days × Temp Factor ] ÷ (System Voltage × Max DoD)
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900 mb-1.5">Why 48V Beats 12V for Whole-Home Systems</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">
+              Doubling or quadrupling system voltage cuts DC current proportionally (P = V × I). A 3,000W inverter draws <strong>250 Amps at 12V</strong> (requiring expensive 4/0 AWG cables), whereas at <strong>48V it draws just 62.5 Amps</strong>, allowing thinner copper cables and higher MPPT solar controller capacity.
+            </p>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-900 mb-1.5">Cold Weather Charging Warning</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">
+              Standard LiFePO4 cells can discharge down to -20°C (-4°F) with a 15–25% capacity buffer, but <strong>must never be charged below 0°C (32°F)</strong> unless equipped with internal self-heating pads and a low-temperature BMS cutoff.
+            </p>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TOOL 2: SOLAR PANEL ARRAY SIZING CALCULATOR                           -->
+    <!-- ===================================================================== -->
+    <section id="panel-solar-array" class="tool-panel hidden space-y-8">
+      <div class="max-w-3xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold mb-3">
+          PV Array &amp; MPPT Controller Engineering
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Solar Panel Array &amp; MPPT Sizing Calculator</h1>
+        <p class="mt-2 text-sm sm:text-base text-slate-600 leading-relaxed">
+          Determine the exact solar panel array wattage, panel count, and MPPT charge controller amperage needed to recharge your battery bank using US and UK Peak Sun Hours (PSH) data.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-5">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h2 class="text-base font-bold text-slate-900">Solar Resource &amp; Panel Inputs</h2>
+            <button type="button" onclick="resetSolarCalc()" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700">Reset Defaults</button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="sol-wh" class="block text-xs font-semibold text-slate-700 mb-1.5">Daily Target Recharge Load (Wh/day)</label>
+              <input type="number" id="sol-wh" value="5200" min="100" max="250000" step="100" oninput="calcSolar()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none" />
+            </div>
+
+            <div>
+              <label for="sol-region" class="block text-xs font-semibold text-slate-700 mb-1.5">US / UK Region Peak Sun Hours Preset</label>
+              <select id="sol-region" onchange="applySunPreset()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none">
+                <option value="5.8">🇺🇸 US Southwest (AZ, NV, SoCal) — 5.8 hrs</option>
+                <option value="4.8" selected>🇺🇸 US Southeast / Texas (FL, TX, GA) — 4.8 hrs</option>
+                <option value="4.1">🇺🇸 US Northeast / Midwest (NY, IL, OH) — 4.1 hrs</option>
+                <option value="3.5">🇺🇸 US Pacific Northwest (WA, OR) — 3.5 hrs</option>
+                <option value="3.1">🇬🇧 UK South England (London, Bristol) — 3.1 hrs</option>
+                <option value="2.6">🇬🇧 UK North &amp; Scotland (Manchester, Edinburgh) — 2.6 hrs</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="sol-psh" class="block text-xs font-semibold text-slate-700 mb-1.5">Custom Peak Sun Hours (hrs/day)</label>
+              <input type="number" id="sol-psh" value="4.8" min="1.0" max="9.0" step="0.1" oninput="calcSolar()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none" />
+              <p class="text-[11px] text-slate-400 mt-1">Use worst-month winter PSH for year-round off-grid</p>
+            </div>
+
+            <div>
+              <label for="sol-eff" class="block text-xs font-semibold text-slate-700 mb-1.5">Real-World System Efficiency (%)</label>
+              <input type="number" id="sol-eff" value="80" min="55" max="95" step="1" oninput="calcSolar()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none" />
+              <p class="text-[11px] text-slate-400 mt-1">Accounts for heat derating, dust, &amp; MPPT losses (~80%)</p>
+            </div>
+
+            <div>
+              <label for="sol-panel-w" class="block text-xs font-semibold text-slate-700 mb-1.5">Individual Panel Wattage (W)</label>
+              <select id="sol-panel-w" onchange="calcSolar()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none">
+                <option value="100">100W (RV / Van Roof Panel)</option>
+                <option value="200">200W (Compact Off-Grid Panel)</option>
+                <option value="400" selected>400W (Standard Residential Bifacial)</option>
+                <option value="450">450W (High-Output Commercial/Roof)</option>
+                <option value="550">550W (Ground-Mount Utility Panel)</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="sol-bat-v" class="block text-xs font-semibold text-slate-700 mb-1.5">Battery Bank Voltage (for MPPT Sizing)</label>
+              <select id="sol-bat-v" onchange="calcSolar()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none">
+                <option value="12">12V Battery Bank</option>
+                <option value="24">24V Battery Bank</option>
+                <option value="48" selected>48V Battery Bank</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 bg-slate-900 text-white rounded-2xl p-5 sm:p-6 shadow-md space-y-5">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Solar Array &amp; MPPT Output</span>
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/20 text-amber-300">NEC 1.25× Safe</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-slate-800/80 rounded-xl p-4 border border-slate-700/70">
+              <p class="text-xs text-slate-400">Minimum Array Size</p>
+              <p id="res-sol-watts" class="text-2xl sm:text-3xl font-extrabold text-amber-400 mt-1">1,354 W</p>
+              <p id="res-sol-actual" class="text-xs text-slate-300 mt-1">1,600 W installed</p>
+            </div>
+            <div class="bg-slate-800/80 rounded-xl p-4 border border-slate-700/70">
+              <p class="text-xs text-slate-400">Panels Required</p>
+              <p id="res-sol-count" class="text-2xl sm:text-3xl font-extrabold text-white mt-1">4 Panels</p>
+              <p id="res-sol-panel-desc" class="text-xs text-slate-300 mt-1">4 × 400W modules</p>
+            </div>
+          </div>
+
+          <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/60 space-y-2.5 text-sm">
+            <div class="flex justify-between">
+              <span class="text-slate-400">Raw MPPT Charge Current:</span>
+              <span id="res-sol-raw-amp" class="font-bold text-white">33.3 A</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Recommended MPPT Controller:</span>
+              <span id="res-sol-mppt" class="font-bold text-emerald-400">45A / 150V MPPT</span>
+            </div>
+            <div class="flex justify-between pt-2 border-t border-slate-700/70">
+              <span class="text-slate-300 font-medium">Est. Panels + MPPT Cost:</span>
+              <span id="res-sol-cost" class="font-extrabold text-lg text-amber-300">$1,280</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <article class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 space-y-4">
+        <h2 class="text-xl font-bold text-slate-900">Understanding Peak Sun Hours &amp; MPPT Controller Sizing</h2>
+        <p class="text-sm text-slate-600 leading-relaxed">
+          <strong>Peak Sun Hours (PSH)</strong> does not mean total daylight hours—it measures how many equivalent hours solar irradiance averages <strong>1,000 W/m²</strong>. While Phoenix, Arizona averages ~6.5 PSH annually, London or Manchester averages ~2.6–3.1 PSH (and drops below 1.2 PSH in December).
+        </p>
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 font-mono text-xs sm:text-sm text-slate-800">
+          Array Watts = Daily Wh ÷ (Peak Sun Hours × System Efficiency) &nbsp;|&nbsp; MPPT Amps = (Installed Array Watts ÷ Battery Voltage) × 1.25
+        </div>
+      </article>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TOOL 3: PURE SINE WAVE INVERTER SIZING CALCULATOR                     -->
+    <!-- ===================================================================== -->
+    <section id="panel-inverter-sizing" class="tool-panel hidden space-y-8">
+      <div class="max-w-3xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold mb-3">
+          AC Load &amp; Inductive Surge Protection
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Pure Sine Wave Inverter Sizing Calculator</h1>
+        <p class="mt-2 text-sm sm:text-base text-slate-600 leading-relaxed">
+          Prevent inverter overload shutdowns by accounting for continuous AC loads, inductive motor startup surges (well pumps, air conditioners, refrigerators), power factor, and DC terminal fuse sizing.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-5">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h2 class="text-base font-bold text-slate-900">AC Appliance &amp; Surge Loads</h2>
+            <button type="button" onclick="resetInverterCalc()" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700">Reset Defaults</button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="inv-cont" class="block text-xs font-semibold text-slate-700 mb-1.5">Total Simultaneous Running Watts (W)</label>
+              <input type="number" id="inv-cont" value="1850" min="50" max="50000" step="50" oninput="calcInverter()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none" />
+              <p class="text-[11px] text-slate-400 mt-1">Sum of all AC devices running at the same time</p>
+            </div>
+
+            <div>
+              <label for="inv-motor" class="block text-xs font-semibold text-slate-700 mb-1.5">Largest Inductive Motor Load (Running W)</label>
+              <input type="number" id="inv-motor" value="600" min="0" max="15000" step="50" oninput="calcInverter()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none" />
+              <p class="text-[11px] text-slate-400 mt-1">Fridge compressor, well pump, circular saw, or AC</p>
+            </div>
+
+            <div>
+              <label for="inv-surge-mult" class="block text-xs font-semibold text-slate-700 mb-1.5">Motor Startup Surge Multiplier</label>
+              <select id="inv-surge-mult" onchange="calcInverter()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none">
+                <option value="1.5">1.5× (Inverter-Driven Mini-Split / Soft-Start)</option>
+                <option value="3.0" selected>3.0× (Standard Refrigerator / Power Tools)</option>
+                <option value="4.5">4.5× (Deep Well Pump / Air Compressor)</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="inv-pf" class="block text-xs font-semibold text-slate-700 mb-1.5">Average Load Power Factor (PF)</label>
+              <select id="inv-pf" onchange="calcInverter()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none">
+                <option value="1.0">1.00 (Pure Resistive: Heaters, Kettles)</option>
+                <option value="0.85" selected>0.85 (Mixed Home Electronics &amp; Motors)</option>
+                <option value="0.75">0.75 (Heavy Inductive Workshop Motors)</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="inv-headroom" class="block text-xs font-semibold text-slate-700 mb-1.5">Safety Expansion Headroom (%)</label>
+              <input type="number" id="inv-headroom" value="25" min="0" max="100" step="5" oninput="calcInverter()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none" />
+            </div>
+
+            <div>
+              <label for="inv-dc-volt" class="block text-xs font-semibold text-slate-700 mb-1.5">DC Battery Input Voltage</label>
+              <select id="inv-dc-volt" onchange="calcInverter()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none">
+                <option value="12">12V DC</option>
+                <option value="24">24V DC</option>
+                <option value="48" selected>48V DC</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 bg-slate-900 text-white rounded-2xl p-5 sm:p-6 shadow-md space-y-5">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">Inverter &amp; Fuse Specification</span>
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-500/20 text-indigo-300">Pure Sine Wave</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-slate-800/80 rounded-xl p-4 border border-slate-700/70">
+              <p class="text-xs text-slate-400">Continuous Rating</p>
+              <p id="res-inv-watts" class="text-2xl sm:text-3xl font-extrabold text-indigo-400 mt-1">2,313 W</p>
+              <p id="res-inv-va" class="text-xs text-slate-300 mt-1">2,721 VA apparent</p>
+            </div>
+            <div class="bg-slate-800/80 rounded-xl p-4 border border-slate-700/70">
+              <p class="text-xs text-slate-400">Peak Surge Requirement</p>
+              <p id="res-inv-surge" class="text-2xl sm:text-3xl font-extrabold text-white mt-1">3,050 W</p>
+              <p class="text-xs text-slate-300 mt-1">5-sec inductive startup</p>
+            </div>
+          </div>
+
+          <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/60 space-y-2.5 text-sm">
+            <div class="flex justify-between">
+              <span class="text-slate-400">Recommended Standard Inverter:</span>
+              <span id="res-inv-rec" class="font-bold text-emerald-400">3,000W / 3kVA Pure Sine</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Max Continuous DC Draw:</span>
+              <span id="res-inv-dc-amp" class="font-bold text-white">52.4 A @ 48V</span>
+            </div>
+            <div class="flex justify-between pt-2 border-t border-slate-700/70">
+              <span class="text-slate-300 font-medium">Recommended Class-T DC Fuse:</span>
+              <span id="res-inv-fuse" class="font-extrabold text-lg text-amber-300">70 Amp Fuse</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <article class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 space-y-4">
+        <h2 class="text-xl font-bold text-slate-900">Why High-Frequency vs. Low-Frequency Inverters Matter for Surges</h2>
+        <p class="text-sm text-slate-600 leading-relaxed">
+          Induction motors (well pumps, refrigerators, table saws) draw <strong>3× to 5× their running wattage</strong> for 0.5 to 3 seconds during startup. Low-frequency toroidal transformer inverters (such as Victron MultiPlus or Schneider) handle 200% surge loads effortlessly, whereas budget high-frequency inverters often trip on overload unless oversized by at least 25–30%.
+        </p>
+      </article>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TOOL 4: DC WIRE GAUGE & VOLTAGE DROP CALCULATOR                       -->
+    <!-- ===================================================================== -->
+    <section id="panel-wire-gauge" class="tool-panel hidden space-y-8">
+      <div class="max-w-3xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold mb-3">
+          NEC / BS 7671 Copper Cable Safety
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">DC Wire Gauge &amp; Voltage Drop Calculator</h1>
+        <p class="mt-2 text-sm sm:text-base text-slate-600 leading-relaxed">
+          Calculate exact round-trip voltage drop (V and %), power loss in watts, and recommended AWG / mm² copper conductor size for solar PV strings, MPPT runs, and battery-to-inverter cables.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-5">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h2 class="text-base font-bold text-slate-900">Circuit &amp; Conductor Parameters</h2>
+            <button type="button" onclick="resetWireCalc()" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700">Reset Defaults</button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="wire-volt" class="block text-xs font-semibold text-slate-700 mb-1.5">Circuit Voltage (V DC)</label>
+              <input type="number" id="wire-volt" value="48" min="5" max="1000" step="1" oninput="calcWire()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none" />
+              <p class="text-[11px] text-slate-400 mt-1">12V, 24V, 48V, or PV string Vmp (e.g. 120V)</p>
+            </div>
+
+            <div>
+              <label for="wire-amp" class="block text-xs font-semibold text-slate-700 mb-1.5">Continuous Current (Amps)</label>
+              <input type="number" id="wire-amp" value="60" min="0.5" max="1000" step="0.5" oninput="calcWire()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none" />
+            </div>
+
+            <div>
+              <label for="wire-len" class="block text-xs font-semibold text-slate-700 mb-1.5">One-Way Cable Length</label>
+              <div class="flex gap-2">
+                <input type="number" id="wire-len" value="15" min="1" max="2000" step="1" oninput="calcWire()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none" />
+                <select id="wire-unit" onchange="calcWire()" class="rounded-xl border border-slate-300 px-3 py-2.5 text-sm font-semibold text-slate-900 bg-white focus:border-emerald-500 outline-none">
+                  <option value="ft" selected>Feet (ft)</option>
+                  <option value="m">Meters (m)</option>
+                </select>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-1">Enter one-way distance (round-trip 2× is auto-calculated)</p>
+            </div>
+
+            <div>
+              <label for="wire-max-drop" class="block text-xs font-semibold text-slate-700 mb-1.5">Max Allowable Voltage Drop (%)</label>
+              <select id="wire-max-drop" onchange="calcWire()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none">
+                <option value="1.0">1.0% (Battery-to-Inverter Critical Run)</option>
+                <option value="2.0" selected>2.0% (Recommended Solar PV / MPPT Run)</option>
+                <option value="3.0">3.0% (NEC Maximum Branch Circuit)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 bg-slate-900 text-white rounded-2xl p-5 sm:p-6 shadow-md space-y-5">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-rose-400">Recommended Copper Cable</span>
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300">90°C Pure Copper</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-slate-800/80 rounded-xl p-4 border border-slate-700/70">
+              <p class="text-xs text-slate-400">US Standard Gauge</p>
+              <p id="res-wire-awg" class="text-2xl sm:text-3xl font-extrabold text-emerald-400 mt-1">4 AWG</p>
+              <p id="res-wire-mm2" class="text-xs text-slate-300 mt-1">25 mm² UK/Metric</p>
+            </div>
+            <div class="bg-slate-800/80 rounded-xl p-4 border border-slate-700/70">
+              <p class="text-xs text-slate-400">Actual Voltage Drop</p>
+              <p id="res-wire-drop-pct" class="text-2xl sm:text-3xl font-extrabold text-white mt-1">0.94%</p>
+              <p id="res-wire-drop-v" class="text-xs text-slate-300 mt-1">0.45 V lost</p>
+            </div>
+          </div>
+
+          <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/60 space-y-2.5 text-sm">
+            <div class="flex justify-between">
+              <span class="text-slate-400">Round-Trip Wire Length:</span>
+              <span id="res-wire-roundtrip" class="font-bold text-white">30 ft (9.1 m)</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Heat / Power Loss in Cable:</span>
+              <span id="res-wire-loss" class="font-bold text-amber-300">27.0 Watts</span>
+            </div>
+            <div class="flex justify-between pt-2 border-t border-slate-700/70">
+              <span class="text-slate-300 font-medium">Voltage Delivered at Load:</span>
+              <span id="res-wire-end-v" class="font-extrabold text-emerald-400">47.55 V</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <article class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 space-y-4">
+        <h2 class="text-xl font-bold text-slate-900">DC Voltage Drop Formula &amp; Ampacity Rules</h2>
+        <p class="text-sm text-slate-600 leading-relaxed">
+          In low-voltage DC systems (12V/24V/48V), voltage drop is calculated over the <strong>full round-trip loop (positive + negative cable length = 2 × L)</strong>. Even a 1.5V drop on a 12V battery cable represents a 12.5% energy loss and can prematurely trigger an inverter's low-voltage cutoff alarm.
+        </p>
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 font-mono text-xs sm:text-sm text-slate-800">
+          V_drop = (2 × Length_meters × Current_Amps × 0.0175 Ω·mm²/m) ÷ Cross_Section_mm²
+        </div>
+      </article>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TOOL 5: HOME EV CHARGER & OFF-PEAK TARIFF SAVINGS CALCULATOR          -->
+    <!-- ===================================================================== -->
+    <section id="panel-ev-charging" class="tool-panel hidden space-y-8">
+      <div class="max-w-3xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 border border-sky-200 text-sky-700 text-xs font-semibold mb-3">
+          Level 2 (7kW–11kW) Home EV Economics
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Home EV Charger &amp; Off-Peak Tariff Savings Calculator</h1>
+        <p class="mt-2 text-sm sm:text-base text-slate-600 leading-relaxed">
+          Compare annual home EV charging costs on overnight Time-of-Use (TOU) tariffs (e.g., Octopus Intelligent Go / US EV rates) against petrol/gasoline fuel costs, and calculate your Level 2 charger payback period.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-5">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h2 class="text-base font-bold text-slate-900">Driving, Tariff &amp; Charger Inputs</h2>
+            <button type="button" onclick="resetEvCalc()" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700">Reset Defaults</button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="ev-miles" class="block text-xs font-semibold text-slate-700 mb-1.5">Annual Distance Driven (Miles/year)</label>
+              <input type="number" id="ev-miles" value="12000" min="1000" max="100000" step="500" oninput="calcEv()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none" />
+            </div>
+
+            <div>
+              <label for="ev-eff" class="block text-xs font-semibold text-slate-700 mb-1.5">EV Efficiency (Miles per kWh)</label>
+              <input type="number" id="ev-eff" value="3.6" min="1.5" max="6.0" step="0.1" oninput="calcEv()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none" />
+              <p class="text-[11px] text-slate-400 mt-1">Model 3/Y: ~3.8 | F-150 Lightning: ~2.1</p>
+            </div>
+
+            <div>
+              <label for="ev-elec-rate" class="block text-xs font-semibold text-slate-700 mb-1.5">Off-Peak Home Electricity Rate (<span class="curr-sym">$</span>/kWh)</label>
+              <input type="number" id="ev-elec-rate" value="0.09" min="0.01" max="1.00" step="0.01" oninput="calcEv()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none" />
+              <p class="text-[11px] text-slate-400 mt-1">US TOU: ~$0.08–$0.12 | UK Off-Peak: ~£0.07</p>
+            </div>
+
+            <div>
+              <label for="ev-gas-price" class="block text-xs font-semibold text-slate-700 mb-1.5">Petrol / Gas Price (<span class="curr-sym">$</span> per Gallon)</label>
+              <input type="number" id="ev-gas-price" value="3.50" min="1.00" max="15.00" step="0.05" oninput="calcEv()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none" />
+              <p class="text-[11px] text-slate-400 mt-1">UK note: £1.40/litre ≈ £6.36 per UK Imperial gallon</p>
+            </div>
+
+            <div>
+              <label for="ev-mpg" class="block text-xs font-semibold text-slate-700 mb-1.5">Comparable Gas/Petrol Car MPG</label>
+              <input type="number" id="ev-mpg" value="30" min="10" max="80" step="1" oninput="calcEv()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none" />
+            </div>
+
+            <div>
+              <label for="ev-charger-kw" class="block text-xs font-semibold text-slate-700 mb-1.5">Level 2 Charger Power &amp; Install Cost</label>
+              <div class="grid grid-cols-2 gap-2">
+                <select id="ev-charger-kw" onchange="calcEv()" class="rounded-xl border border-slate-300 px-2.5 py-2.5 text-sm font-semibold text-slate-900 bg-white focus:border-emerald-500 outline-none">
+                  <option value="7.4" selected>7.4 kW (32A)</option>
+                  <option value="9.6">9.6 kW (40A)</option>
+                  <option value="11.5">11.5 kW (48A)</option>
+                </select>
+                <input type="number" id="ev-install-cost" value="1200" min="200" max="10000" step="50" oninput="calcEv()" aria-label="Install Cost" class="rounded-xl border border-slate-300 px-3 py-2.5 text-sm font-semibold text-slate-900 focus:border-emerald-500 outline-none" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 bg-slate-900 text-white rounded-2xl p-5 sm:p-6 shadow-md space-y-5">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-sky-400">Annual EV Savings Analysis</span>
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-sky-500/20 text-sky-300">90% Charge Eff.</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-slate-800/80 rounded-xl p-4 border border-slate-700/70">
+              <p class="text-xs text-slate-400">Annual Fuel Savings</p>
+              <p id="res-ev-savings" class="text-2xl sm:text-3xl font-extrabold text-emerald-400 mt-1">$1,067</p>
+              <p id="res-ev-monthly" class="text-xs text-slate-300 mt-1">$89 / month saved</p>
+            </div>
+            <div class="bg-slate-800/80 rounded-xl p-4 border border-slate-700/70">
+              <p class="text-xs text-slate-400">Charger Payback</p>
+              <p id="res-ev-payback" class="text-2xl sm:text-3xl font-extrabold text-white mt-1">13.5 mos</p>
+              <p class="text-xs text-slate-300 mt-1">Hardware + install ROI</p>
+            </div>
+          </div>
+
+          <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/60 space-y-2.5 text-sm">
+            <div class="flex justify-between">
+              <span class="text-slate-400">Annual Home EV Electricity Cost:</span>
+              <span id="res-ev-elec-cost" class="font-bold text-white">$333 / yr</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Equivalent Petrol / Gas Cost:</span>
+              <span id="res-ev-gas-cost" class="font-bold text-rose-300">$1,400 / yr</span>
+            </div>
+            <div class="flex justify-between pt-2 border-t border-slate-700/70">
+              <span class="text-slate-300 font-medium">20% → 80% Charge Time (75kWh EV):</span>
+              <span id="res-ev-time" class="font-extrabold text-sky-300">6 hrs 45 mins</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <article class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 space-y-4">
+        <h2 class="text-xl font-bold text-slate-900">Why Off-Peak Time-of-Use Tariffs Cut EV Fuel Costs by 75%+</h2>
+        <p class="text-sm text-slate-600 leading-relaxed">
+          Level 2 AC home charging operates at roughly <strong>88%–92% wall-to-battery efficiency</strong>. Pairing a smart 7.4kW (UK single-phase 32A) or 11.5kW (US split-phase 48A) charger with an overnight off-peak electricity tariff reduces driving cost to roughly <strong>2–3 cents (or pence) per mile</strong>—making installation payback achievable in just over one year for average drivers.
+        </p>
+      </article>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TOOL 6: RESIDENTIAL SOLAR + BATTERY ROI & PAYBACK CALCULATOR          -->
+    <!-- ===================================================================== -->
+    <section id="panel-solar-roi" class="tool-panel hidden space-y-8">
+      <div class="max-w-3xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold mb-3">
+          US 30% Federal ITC &amp; UK 0% VAT Financial Modeling
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Residential Solar + Battery ROI &amp; Payback Calculator</h1>
+        <p class="mt-2 text-sm sm:text-base text-slate-600 leading-relaxed">
+          Model net installation cost after incentives, Year 1 utility bill savings, export tariff income, and 20-year cumulative net profit with utility rate inflation compounding.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-5">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h2 class="text-base font-bold text-slate-900">Financial &amp; Utility Parameters</h2>
+            <button type="button" onclick="resetRoiCalc()" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700">Reset Defaults</button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="roi-gross" class="block text-xs font-semibold text-slate-700 mb-1.5">Gross System Turnkey Cost (<span class="curr-sym">$</span>)</label>
+              <input type="number" id="roi-gross" value="18500" min="2000" max="150000" step="500" oninput="calcRoi()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none" />
+            </div>
+
+            <div>
+              <label for="roi-incentive" class="block text-xs font-semibold text-slate-700 mb-1.5">Tax Credit / Incentive Preset</label>
+              <select id="roi-incentive" onchange="calcRoi()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none">
+                <option value="0.30" selected>🇺🇸 US 30% Federal Residential Clean Energy ITC</option>
+                <option value="0.40">🇺🇸 US 30% ITC + 10% State/Local Rebate</option>
+                <option value="0.00">🇬🇧 UK 0% VAT Applied (Quote Already VAT-Free)</option>
+                <option value="0.15">🇬🇧 UK ECO4 / Local Council Grant (~15% Off)</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="roi-bill" class="block text-xs font-semibold text-slate-700 mb-1.5">Current Monthly Electric Bill (<span class="curr-sym">$</span>/mo)</label>
+              <input type="number" id="roi-bill" value="210" min="30" max="3000" step="10" oninput="calcRoi()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none" />
+            </div>
+
+            <div>
+              <label for="roi-offset" class="block text-xs font-semibold text-slate-700 mb-1.5">Self-Consumption + Bill Offset (%)</label>
+              <input type="number" id="roi-offset" value="85" min="30" max="100" step="5" oninput="calcRoi()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none" />
+            </div>
+
+            <div>
+              <label for="roi-export" class="block text-xs font-semibold text-slate-700 mb-1.5">Annual Grid Export Income (<span class="curr-sym">$</span>/yr)</label>
+              <input type="number" id="roi-export" value="320" min="0" max="10000" step="20" oninput="calcRoi()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none" />
+              <p class="text-[11px] text-slate-400 mt-1">UK Smart Export Guarantee (SEG) or US Net Billing</p>
+            </div>
+
+            <div>
+              <label for="roi-inflation" class="block text-xs font-semibold text-slate-700 mb-1.5">Annual Utility Rate Inflation (%/yr)</label>
+              <input type="number" id="roi-inflation" value="4.5" min="0" max="15" step="0.5" oninput="calcRoi()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none" />
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 bg-slate-900 text-white rounded-2xl p-5 sm:p-6 shadow-md space-y-5">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">20-Year Investment Return</span>
+            <span id="res-roi-irr" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300">19.0% Yr-1 Yield</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-slate-800/80 rounded-xl p-4 border border-slate-700/70">
+              <p class="text-xs text-slate-400">Payback Period</p>
+              <p id="res-roi-payback" class="text-2xl sm:text-3xl font-extrabold text-emerald-400 mt-1">5.0 yrs</p>
+              <p class="text-xs text-slate-300 mt-1">Break-even point</p>
+            </div>
+            <div class="bg-slate-800/80 rounded-xl p-4 border border-slate-700/70">
+              <p class="text-xs text-slate-400">20-Year Net Profit</p>
+              <p id="res-roi-profit" class="text-2xl sm:text-3xl font-extrabold text-amber-300 mt-1">$62,920</p>
+              <p class="text-xs text-slate-300 mt-1">After net install cost</p>
+            </div>
+          </div>
+
+          <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/60 space-y-2.5 text-sm">
+            <div class="flex justify-between">
+              <span class="text-slate-400">Net Out-of-Pocket Cost:</span>
+              <span id="res-roi-net-cost" class="font-bold text-white">$12,950</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Year 1 Total Bill + Export Savings:</span>
+              <span id="res-roi-yr1" class="font-bold text-emerald-300">$2,462 / yr</span>
+            </div>
+            <div class="flex justify-between pt-2 border-t border-slate-700/70">
+              <span class="text-slate-300 font-medium">20-Year Gross Value Generated:</span>
+              <span id="res-roi-gross20" class="font-extrabold text-white">$75,870</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <article class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 space-y-4">
+        <h2 class="text-xl font-bold text-slate-900">How Tax Credits &amp; Compounding Utility Inflation Drive Solar ROI</h2>
+        <p class="text-sm text-slate-600 leading-relaxed">
+          In the United States, the <strong>30% Residential Clean Energy Credit (IRC Section 25D)</strong> applies to both solar panels and standalone battery storage (≥3 kWh), immediately cutting upfront capital outlay by nearly a third. In the United Kingdom, residential solar and battery installations benefit from <strong>0% VAT</strong> alongside Smart Export Guarantee (SEG) payments up to 15p/kWh for exported surplus.
+        </p>
+      </article>
+    </section>
+
+    <!-- Bottom AdSense Anchor / Multiplex Slot -->
+    <div class="mt-10 w-full min-h-[100px] bg-slate-100/90 border border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center text-center p-3">
+      <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Advertisement · Matched Content / Multiplex Ad Unit</span>
+      <span class="text-xs text-slate-400 mt-0.5">Reserved bottom-of-page AdSense container</span>
+    </div>
+  </main>
+
+  <!-- AdSense-Mandatory Trust & Compliance Footer -->
+  <footer class="bg-white border-t border-slate-200 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div>
+          <span class="font-extrabold text-base text-slate-900">VoltCalc<span class="text-emerald-600">Pro</span></span>
+          <p class="text-xs text-slate-500 mt-1 max-w-md">
+            Independent renewable energy, LiFePO4 battery storage, and EV charging engineering calculators for US &amp; UK homeowners, installers, and off-grid builders.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-4 sm:gap-6 text-xs font-semibold text-slate-600">
+          <button type="button" onclick="openLegalModal('about')" class="hover:text-emerald-600 transition">About Us</button>
+          <button type="button" onclick="openLegalModal('privacy')" class="hover:text-emerald-600 transition">Privacy Policy</button>
+          <button type="button" onclick="openLegalModal('disclaimer')" class="hover:text-emerald-600 transition">Engineering &amp; Financial Disclaimer</button>
+          <button type="button" onclick="openLegalModal('contact')" class="hover:text-emerald-600 transition">Contact</button>
+        </div>
+      </div>
+
+      <div class="mt-6 pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-400">
+        <p>© 2026 VoltCalc Pro. All rights reserved. Hosted on Cloudflare Edge Network.</p>
+        <p>Calculations adhere to NEC / BS 7671 engineering guidelines. Always verify with a licensed electrician.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Legal & Compliance Modal (About, Privacy Policy, Disclaimer, Contact) -->
+  <div id="legal-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4" role="dialog" aria-modal="true">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 sm:p-7 shadow-2xl border border-slate-200 max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+        <h3 id="modal-title" class="text-lg font-bold text-slate-900">Legal Information</h3>
+        <button type="button" onclick="closeLegalModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100" aria-label="Close modal">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div id="modal-body" class="text-sm text-slate-600 space-y-3 leading-relaxed"></div>
+      <div class="mt-6 pt-4 border-t border-slate-100 flex justify-end">
+        <button type="button" onclick="closeLegalModal()" class="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // GLOBAL STATE & CURRENCY FORMATTING (USD $ / GBP £)
+    // =========================================================================
+    const state = {
+      currency: 'USD',
+      symbol: '$',
+      fxRate: 0.79, // Approximate USD -> GBP conversion for default hardware estimates
+      activeTool: 'battery-sizing'
+    };
+
+    const VALID_TOOLS = [
+      'battery-sizing',
+      'solar-array',
+      'inverter-sizing',
+      'wire-gauge',
+      'ev-charging',
+      'solar-roi'
+    ];
+
+    function formatMoney(usdAmount, convert = true) {
+      const val = convert && state.currency === 'GBP' ? usdAmount * state.fxRate : usdAmount;
+      return state.symbol + Math.round(val).toLocaleString('en-US');
+    }
+
+    function setCurrency(curr) {
+      state.currency = curr;
+      state.symbol = curr === 'GBP' ? '£' : '$';
+
+      const btnUsd = document.getElementById('btn-usd');
+      const btnGbp = document.getElementById('btn-gbp');
+      if (curr === 'USD') {
+        btnUsd.className = 'px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg transition-all bg-white text-slate-900 shadow-sm';
+        btnGbp.className = 'px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-600 hover:text-slate-900';
+      } else {
+        btnGbp.className = 'px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg transition-all bg-white text-slate-900 shadow-sm';
+        btnUsd.className = 'px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-600 hover:text-slate-900';
+      }
+
+      document.querySelectorAll('.curr-sym').forEach(el => {
+        el.textContent = state.symbol;
+      });
+
+      recalculateAll();
+    }
+
+    // =========================================================================
+    // HASH ROUTING & MULTI-TOOL CLUSTER NAVIGATION
+    // =========================================================================
+    function switchTool(toolId, event) {
+      if (event) event.preventDefault();
+      if (!VALID_TOOLS.includes(toolId)) toolId = 'battery-sizing';
+
+      state.activeTool = toolId;
+      if (window.location.hash !== '#' + toolId) {
+        history.replaceState(null, '', '#' + toolId);
+      }
+
+      // Toggle panels
+      document.querySelectorAll('.tool-panel').forEach(panel => {
+        panel.classList.add('hidden');
+      });
+      const activePanel = document.getElementById('panel-' + toolId);
+      if (activePanel) activePanel.classList.remove('hidden');
+
+      // Update active tab pill styling
+      document.querySelectorAll('.tool-tab').forEach(tab => {
+        const isTarget = tab.getAttribute('data-tab') === toolId;
+        tab.className = isTarget
+          ? 'tool-tab shrink-0 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-emerald-600 text-white shadow-sm'
+          : 'tool-tab shrink-0 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900';
+      });
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-msg').textContent = message;
+      toast.classList.remove('hidden');
+      toast.classList.add('flex');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
+        toast.classList.add('hidden');
+        toast.classList.remove('flex');
+      }, 2800);
+    }
+
+    function copyShareUrl() {
+      const dummy = document.createElement('input');
+      dummy.value = window.location.href;
+      document.body.appendChild(dummy);
+      dummy.select();
+      try {
+        document.execCommand('copy');
+        showToast('Direct calculator URL copied to clipboard!');
+      } catch (e) {
+        showToast('Copy failed — please copy URL from address bar.');
+      }
+      document.body.removeChild(dummy);
+    }
+
+    // =========================================================================
+    // 1. LiFePO4 BATTERY BANK SIZING CALCULATOR
+    // =========================================================================
+    function calcBattery() {
+      const dailyWh = Math.max(0, parseFloat(document.getElementById('bat-wh').value) || 0);
+      const volt = parseFloat(document.getElementById('bat-volt').value) || 48;
+      const days = Math.max(0.1, parseFloat(document.getElementById('bat-days').value) || 1);
+      const dod = parseFloat(document.getElementById('bat-chem').value) || 0.80;
+      const tempFactor = parseFloat(document.getElementById('bat-temp').value) || 1.0;
+      const eff = Math.min(1, Math.max(0.5, (parseFloat(document.getElementById('bat-eff').value) || 92) / 100));
+
+      const rawDailyDcWh = dailyWh / eff;
+      const usableWhNeeded = rawDailyDcWh * days * tempFactor;
+      const nameplateWhNeeded = usableWhNeeded / dod;
+      const requiredAh = nameplateWhNeeded / volt;
+
+      const nameplateKwh = nameplateWhNeeded / 1000;
+      const usableKwh = usableWhNeeded / 1000;
+
+      // Series / Parallel calculation using 12V 100Ah modules
+      const seriesCount = Math.round(volt / 12);
+      const parallelStrings = Math.max(1, Math.ceil(requiredAh / 100));
+      const total12vModules = seriesCount * parallelStrings;
+
+      // Native 48V 100Ah server rack modules (4.8kWh each)
+      const rackModules = Math.max(1, Math.ceil(nameplateKwh / 4.8));
+
+      // Cost estimation (~$240/kWh for LiFePO4 vs ~$160/kWh for AGM)
+      const costPerKwhUsd = dod >= 0.8 ? 240 : 165;
+      const estCostUsd = nameplateKwh * costPerKwhUsd;
+
+      const chemLabel = dod >= 0.8 ? 'LiFePO4' : 'AGM';
+      document.getElementById('bat-badge').textContent = `${volt}V ${chemLabel}`;
+      document.getElementById('res-bat-ah').textContent = `${Math.ceil(requiredAh).toLocaleString()} Ah`;
+      document.getElementById('res-bat-total-kwh').textContent = `${nameplateKwh.toFixed(2)} kWh nameplate`;
+      document.getElementById('res-bat-usable').textContent = `${usableKwh.toFixed(2)} kWh`;
+      document.getElementById('res-bat-100ah').textContent = `${total12vModules} batteries (${seriesCount}S${parallelStrings}P)`;
+      document.getElementById('res-bat-rack').textContent = `${rackModules} × 48V 100Ah (Parallel)`;
+      document.getElementById('res-bat-cost').textContent = formatMoney(estCostUsd, true);
+    }
+
+    function resetBatteryCalc() {
+      document.getElementById('bat-wh').value = 4800;
+      document.getElementById('bat-volt').value = '48';
+      document.getElementById('bat-days').value = 2;
+      document.getElementById('bat-chem').value = '0.80';
+      document.getElementById('bat-temp').value = '1.00';
+      document.getElementById('bat-eff').value = 92;
+      calcBattery();
+    }
+
+    // =========================================================================
+    // 2. SOLAR PANEL ARRAY SIZING CALCULATOR
+    // =========================================================================
+    function applySunPreset() {
+      const presetVal = document.getElementById('sol-region').value;
+      document.getElementById('sol-psh').value = presetVal;
+      calcSolar();
+    }
+
+    function calcSolar() {
+      const dailyWh = Math.max(0, parseFloat(document.getElementById('sol-wh').value) || 0);
+      const psh = Math.max(0.5, parseFloat(document.getElementById('sol-psh').value) || 4.8);
+      const eff = Math.min(1, Math.max(0.4, (parseFloat(document.getElementById('sol-eff').value) || 80) / 100));
+      const panelW = parseFloat(document.getElementById('sol-panel-w').value) || 400;
+      const batV = parseFloat(document.getElementById('sol-bat-v').value) || 48;
+
+      const minArrayWatts = dailyWh / (psh * eff);
+      const panelCount = Math.max(1, Math.ceil(minArrayWatts / panelW));
+      const installedWatts = panelCount * panelW;
+
+      const rawAmps = installedWatts / batV;
+      const necSafeAmps = rawAmps * 1.25;
+
+      // Standard MPPT sizes: 20, 30, 45, 60, 85, 100, 150, 200
+      const mpptSizes = [20, 30, 45, 60, 85, 100, 150, 200];
+      const recMppt = mpptSizes.find(s => s >= necSafeAmps) || Math.ceil(necSafeAmps / 50) * 50;
+
+      // Approx $0.65/W panels + $240 MPPT
+      const estCostUsd = installedWatts * 0.65 + (recMppt * 4.5);
+
+      document.getElementById('res-sol-watts').textContent = `${Math.ceil(minArrayWatts).toLocaleString()} W`;
+      document.getElementById('res-sol-actual').textContent = `${installedWatts.toLocaleString()} W installed`;
+      document.getElementById('res-sol-count').textContent = `${panelCount} Panel${panelCount > 1 ? 's' : ''}`;
+      document.getElementById('res-sol-panel-desc').textContent = `${panelCount} × ${panelW}W modules`;
+      document.getElementById('res-sol-raw-amp').textContent = `${rawAmps.toFixed(1)} A`;
+      document.getElementById('res-sol-mppt').textContent = `${recMppt}A / 150V MPPT`;
+      document.getElementById('res-sol-cost').textContent = formatMoney(estCostUsd, true);
+    }
+
+    function resetSolarCalc() {
+      document.getElementById('sol-wh').value = 5200;
+      document.getElementById('sol-region').value = '4.8';
+      document.getElementById('sol-psh').value = 4.8;
+      document.getElementById('sol-eff').value = 80;
+      document.getElementById('sol-panel-w').value = '400';
+      document.getElementById('sol-bat-v').value = '48';
+      calcSolar();
+    }
+
+    // =========================================================================
+    // 3. PURE SINE WAVE INVERTER SIZING CALCULATOR
+    // =========================================================================
+    function calcInverter() {
+      const contW = Math.max(0, parseFloat(document.getElementById('inv-cont').value) || 0);
+      const motorW = Math.max(0, parseFloat(document.getElementById('inv-motor').value) || 0);
+      const surgeMult = parseFloat(document.getElementById('inv-surge-mult').value) || 3.0;
+      const pf = parseFloat(document.getElementById('inv-pf').value) || 0.85;
+      const headroom = (parseFloat(document.getElementById('inv-headroom').value) || 0) / 100;
+      const dcVolt = parseFloat(document.getElementById('inv-dc-volt').value) || 48;
+
+      const reqContinuousW = contW * (1 + headroom);
+      const reqVa = reqContinuousW / pf;
+
+      // Surge = non-motor running loads + (motor running * surge multiplier)
+      const baseNonMotor = Math.max(0, contW - motorW);
+      const peakSurgeW = baseNonMotor + (motorW * surgeMult);
+
+      // Standard commercial inverter sizes
+      const stdSizes = [500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 8000, 10000, 12000, 15000];
+      const minNeeded = Math.max(reqContinuousW, peakSurgeW * 0.55); // Most pure sine inverters surge 2x for 5s
+      const recSize = stdSizes.find(s => s >= minNeeded) || Math.ceil(minNeeded / 1000) * 1000;
+
+      // DC current at 90% inverter efficiency
+      const maxDcAmps = reqContinuousW / (dcVolt * 0.90);
+      const fuseAmps = Math.ceil((maxDcAmps * 1.25) / 10) * 10;
+
+      document.getElementById('res-inv-watts').textContent = `${Math.ceil(reqContinuousW).toLocaleString()} W`;
+      document.getElementById('res-inv-va').textContent = `${Math.ceil(reqVa).toLocaleString()} VA apparent`;
+      document.getElementById('res-inv-surge').textContent = `${Math.ceil(peakSurgeW).toLocaleString()} W`;
+      document.getElementById('res-inv-rec').textContent = `${recSize.toLocaleString()}W / ${(recSize / 1000).toFixed(1)}kVA Pure Sine`;
+      document.getElementById('res-inv-dc-amp').textContent = `${maxDcAmps.toFixed(1)} A @ ${dcVolt}V`;
+      document.getElementById('res-inv-fuse').textContent = `${fuseAmps} Amp Fuse`;
+    }
+
+    function resetInverterCalc() {
+      document.getElementById('inv-cont').value = 1850;
+      document.getElementById('inv-motor').value = 600;
+      document.getElementById('inv-surge-mult').value = '3.0';
+      document.getElementById('inv-pf').value = '0.85';
+      document.getElementById('inv-headroom').value = 25;
+      document.getElementById('inv-dc-volt').value = '48';
+      calcInverter();
+    }
+
+    // =========================================================================
+    // 4. DC WIRE GAUGE & VOLTAGE DROP CALCULATOR
+    // =========================================================================
+    const COPPER_CABLES = [
+      { awg: '14 AWG', mm2: 2.5, maxAmp: 20 },
+      { awg: '12 AWG', mm2: 4.0, maxAmp: 25 },
+      { awg: '10 AWG', mm2: 6.0, maxAmp: 35 },
+      { awg: '8 AWG',  mm2: 10.0, maxAmp: 50 },
+      { awg: '6 AWG',  mm2: 16.0, maxAmp: 65 },
+      { awg: '4 AWG',  mm2: 25.0, maxAmp: 85 },
+      { awg: '2 AWG',  mm2: 35.0, maxAmp: 115 },
+      { awg: '1/0 AWG', mm2: 50.0, maxAmp: 150 },
+      { awg: '2/0 AWG', mm2: 70.0, maxAmp: 175 },
+      { awg: '3/0 AWG', mm2: 95.0, maxAmp: 200 },
+      { awg: '4/0 AWG', mm2: 120.0, maxAmp: 230 },
+      { awg: '2× 4/0 AWG', mm2: 240.0, maxAmp: 460 }
+    ];
+
+    function calcWire() {
+      const volt = Math.max(1, parseFloat(document.getElementById('wire-volt').value) || 48);
+      const amps = Math.max(0.1, parseFloat(document.getElementById('wire-amp').value) || 60);
+      const lenInput = Math.max(0.1, parseFloat(document.getElementById('wire-len').value) || 15);
+      const unit = document.getElementById('wire-unit').value;
+      const maxDropPct = parseFloat(document.getElementById('wire-max-drop').value) || 2.0;
+
+      const oneWayMeters = unit === 'ft' ? lenInput * 0.3048 : lenInput;
+      const oneWayFeet = unit === 'ft' ? lenInput : lenInput / 0.3048;
+      const roundTripMeters = oneWayMeters * 2;
+      const roundTripFeet = oneWayFeet * 2;
+
+      // Copper resistivity at ~25°C = 0.0175 ohm * mm2 / m
+      const maxAllowableVDrop = volt * (maxDropPct / 100);
+      const minRequiredMm2 = (roundTripMeters * amps * 0.0175) / maxAllowableVDrop;
+
+      // Must satisfy both voltage drop AND thermal ampacity
+      const selected = COPPER_CABLES.find(c => c.mm2 >= minRequiredMm2 && c.maxAmp >= amps)
+        || COPPER_CABLES[COPPER_CABLES.length - 1];
+
+      const actualVDrop = (roundTripMeters * amps * 0.0175) / selected.mm2;
+      const actualDropPct = (actualVDrop / volt) * 100;
+      const powerLossW = actualVDrop * amps;
+      const endVoltage = Math.max(0, volt - actualVDrop);
+
+      document.getElementById('res-wire-awg').textContent = selected.awg;
+      document.getElementById('res-wire-mm2').textContent = `${selected.mm2} mm² UK/Metric`;
+      document.getElementById('res-wire-drop-pct').textContent = `${actualDropPct.toFixed(2)}%`;
+      document.getElementById('res-wire-drop-v').textContent = `${actualVDrop.toFixed(2)} V lost`;
+      document.getElementById('res-wire-roundtrip').textContent = `${Math.round(roundTripFeet)} ft (${roundTripMeters.toFixed(1)} m)`;
+      document.getElementById('res-wire-loss').textContent = `${powerLossW.toFixed(1)} Watts`;
+      document.getElementById('res-wire-end-v').textContent = `${endVoltage.toFixed(2)} V`;
+    }
+
+    function resetWireCalc() {
+      document.getElementById('wire-volt').value = 48;
+      document.getElementById('wire-amp').value = 60;
+      document.getElementById('wire-len').value = 15;
+      document.getElementById('wire-unit').value = 'ft';
+      document.getElementById('wire-max-drop').value = '2.0';
+      calcWire();
+    }
+
+    // =========================================================================
+    // 5. HOME EV CHARGER & OFF-PEAK TARIFF SAVINGS CALCULATOR
+    // =========================================================================
+    function calcEv() {
+      const miles = Math.max(0, parseFloat(document.getElementById('ev-miles').value) || 0);
+      const eff = Math.max(0.5, parseFloat(document.getElementById('ev-eff').value) || 3.6);
+      const elecRate = Math.max(0, parseFloat(document.getElementById('ev-elec-rate').value) || 0.09);
+      const gasPrice = Math.max(0, parseFloat(document.getElementById('ev-gas-price').value) || 3.50);
+      const mpg = Math.max(5, parseFloat(document.getElementById('ev-mpg').value) || 30);
+      const chargerKw = parseFloat(document.getElementById('ev-charger-kw').value) || 7.4;
+      const installCost = Math.max(0, parseFloat(document.getElementById('ev-install-cost').value) || 1200);
+
+      // Account for 10% AC-to-DC onboard charger losses (divide by 0.90)
+      const annualKwhFromWall = (miles / eff) / 0.90;
+      const annualEvCost = annualKwhFromWall * elecRate;
+      const annualGasCost = (miles / mpg) * gasPrice;
+
+      const annualSavings = Math.max(0, annualGasCost - annualEvCost);
+      const monthlySavings = annualSavings / 12;
+      const paybackMonths = annualSavings > 0 ? (installCost / monthlySavings) : 0;
+
+      // 20% to 80% of 75 kWh battery = 45 kWh usable + 10% wall loss = 50 kWh
+      const hoursToCharge = 50 / chargerKw;
+      const wholeHrs = Math.floor(hoursToCharge);
+      const mins = Math.round((hoursToCharge - wholeHrs) * 60);
+
+      // Note: user inputs are already entered in their selected currency symbol
+      document.getElementById('res-ev-savings').textContent = formatMoney(annualSavings, false);
+      document.getElementById('res-ev-monthly').textContent = `${formatMoney(monthlySavings, false)} / month saved`;
+      document.getElementById('res-ev-payback').textContent = paybackMonths > 0 ? `${paybackMonths.toFixed(1)} mos` : 'N/A';
+      document.getElementById('res-ev-elec-cost').textContent = `${formatMoney(annualEvCost, false)} / yr`;
+      document.getElementById('res-ev-gas-cost').textContent = `${formatMoney(annualGasCost, false)} / yr`;
+      document.getElementById('res-ev-time').textContent = `${wholeHrs} hrs ${mins} mins`;
+    }
+
+    function resetEvCalc() {
+      document.getElementById('ev-miles').value = 12000;
+      document.getElementById('ev-eff').value = 3.6;
+      document.getElementById('ev-elec-rate').value = 0.09;
+      document.getElementById('ev-gas-price').value = 3.50;
+      document.getElementById('ev-mpg').value = 30;
+      document.getElementById('ev-charger-kw').value = '7.4';
+      document.getElementById('ev-install-cost').value = 1200;
+      calcEv();
+    }
+
+    // =========================================================================
+    // 6. RESIDENTIAL SOLAR + BATTERY ROI & PAYBACK CALCULATOR
+    // =========================================================================
+    function calcRoi() {
+      const grossCost = Math.max(0, parseFloat(document.getElementById('roi-gross').value) || 0);
+      const incentivePct = parseFloat(document.getElementById('roi-incentive').value) || 0;
+      const monthlyBill = Math.max(0, parseFloat(document.getElementById('roi-bill').value) || 0);
+      const offsetPct = Math.min(1, Math.max(0, (parseFloat(document.getElementById('roi-offset').value) || 85) / 100));
+      const exportYr1 = Math.max(0, parseFloat(document.getElementById('roi-export').value) || 0);
+      const inflation = (parseFloat(document.getElementById('roi-inflation').value) || 4.5) / 100;
+
+      const netCost = grossCost * (1 - incentivePct);
+      const billSavingsYr1 = monthlyBill * 12 * offsetPct;
+      const totalSavingsYr1 = billSavingsYr1 + exportYr1;
+
+      let cumulativeSavings = 0;
+      let paybackYear = null;
+
+      for (let yr = 1; yr <= 20; yr++) {
+        // 0.5% annual panel degradation factor alongside utility inflation
+        const degFactor = Math.pow(0.995, yr - 1);
+        const yrBillSaved = billSavingsYr1 * Math.pow(1 + inflation, yr - 1) * degFactor;
+        const yrExport = exportYr1 * degFactor;
+        const yrTotal = yrBillSaved + yrExport;
+
+        const prevCum = cumulativeSavings;
+        cumulativeSavings += yrTotal;
+
+        if (paybackYear === null && cumulativeSavings >= netCost && yrTotal > 0) {
+          const remaining = netCost - prevCum;
+          paybackYear = (yr - 1) + (remaining / yrTotal);
+        }
+      }
+
+      const netProfit20 = cumulativeSavings - netCost;
+      const yr1YieldPct = netCost > 0 ? (totalSavingsYr1 / netCost) * 100 : 0;
+
+      document.getElementById('res-roi-irr').textContent = `${yr1YieldPct.toFixed(1)}% Yr-1 Yield`;
+      document.getElementById('res-roi-payback').textContent = paybackYear ? `${paybackYear.toFixed(1)} yrs` : '> 20 yrs';
+      document.getElementById('res-roi-profit').textContent = formatMoney(netProfit20, false);
+      document.getElementById('res-roi-net-cost').textContent = formatMoney(netCost, false);
+      document.getElementById('res-roi-yr1').textContent = `${formatMoney(totalSavingsYr1, false)} / yr`;
+      document.getElementById('res-roi-gross20').textContent = formatMoney(cumulativeSavings, false);
+    }
+
+    function resetRoiCalc() {
+      document.getElementById('roi-gross').value = 18500;
+      document.getElementById('roi-incentive').value = '0.30';
+      document.getElementById('roi-bill').value = 210;
+      document.getElementById('roi-offset').value = 85;
+      document.getElementById('roi-export').value = 320;
+      document.getElementById('roi-inflation').value = 4.5;
+      calcRoi();
+    }
+
+    // =========================================================================
+    // LEGAL & ADSENSE COMPLIANCE MODALS
+    // =========================================================================
+    const LEGAL_CONTENT = {
+      about: {
+        title: 'About VoltCalc Pro',
+        html: `
+          <p><strong>VoltCalc Pro</strong> is an independent clean-energy engineering and financial modeling suite built for homeowners, off-grid cabin builders, van-life converters, and EV owners across the United States and United Kingdom.</p>
+          <p>All calculations execute 100% locally inside your web browser for instant responsiveness and complete data privacy—your home energy bills, system sizes, and financial inputs are never transmitted to or stored on external servers.</p>
+        `
+      },
+      privacy: {
+        title: 'Privacy Policy & Cookie Disclosure',
+        html: `
+          <p><strong>1. Zero-Server Calculator Inputs:</strong> VoltCalc Pro runs client-side JavaScript calculations directly on your device. We do not collect, store, or sell your personal energy usage or financial figures.</p>
+          <p><strong>2. Third-Party Advertising (Google AdSense):</strong> To keep all 6 engineering calculators free, this site uses Google AdSense. Third-party vendors, including Google, use cookies to serve ads based on a user's prior visits to this website or other websites.</p>
+          <p><strong>3. Opt-Out Controls:</strong> Users may opt out of personalized advertising by visiting <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer" class="text-emerald-600 underline">Google Ads Settings</a> or <a href="https://www.aboutads.info" target="_blank" rel="noopener noreferrer" class="text-emerald-600 underline">www.aboutads.info</a>. UK/EEA visitors are presented with GDPR consent controls prior to non-essential ad cookies loading.</p>
+        `
+      },
+      disclaimer: {
+        title: 'Engineering & Financial Disclaimer',
+        html: `
+          <p><strong>Electrical Safety Notice:</strong> Outputs from the DC Wire Gauge, Battery Bank, Inverter, and MPPT calculators are provided for preliminary educational planning based on standard NEC (US) and BS 7671 (UK) guidelines. High-current DC battery banks carry severe arc-flash and fire risks. Always consult a licensed electrician or MCS/NABCEP-certified solar installer before purchasing hardware or energizing circuits.</p>
+          <p><strong>Tax &amp; ROI Estimates:</strong> US 30% Federal ITC and UK 0% VAT / Smart Export Guarantee figures are illustrative estimates and do not constitute certified tax or financial advice.</p>
+        `
+      },
+      contact: {
+        title: 'Contact VoltCalc Pro Editorial & Engineering Team',
+        html: `
+          <p>Have a suggestion for a new solar, battery, or EV charging calculator, or spotted a regional tariff update?</p>
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-1.5 text-xs sm:text-sm">
+            <p><strong>General &amp; Editorial Inquiries:</strong> editorial@voltcalcpro.example.com</p>
+            <p><strong>Advertising &amp; Partnerships:</strong> partners@voltcalcpro.example.com</p>
+            <p><strong>Response Time:</strong> Typically within 1–2 business days.</p>
+          </div>
+        `
+      }
+    };
+
+    function openLegalModal(type) {
+      const entry = LEGAL_CONTENT[type];
+      if (!entry) return;
+      document.getElementById('modal-title').textContent = entry.title;
+      document.getElementById('modal-body').innerHTML = entry.html;
+      const modal = document.getElementById('legal-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeLegalModal() {
+      const modal = document.getElementById('legal-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function recalculateAll() {
+      calcBattery();
+      calcSolar();
+      calcInverter();
+      calcWire();
+      calcEv();
+      calcRoi();
+    }
+
+    // Initialize on load and listen for hash navigation
+    window.addEventListener('hashchange', () => {
+      const hashTool = window.location.hash.replace('#', '');
+      if (VALID_TOOLS.includes(hashTool)) {
+        switchTool(hashTool);
+      }
+    });
+
+    window.onload = function () {
+      const initialHash = window.location.hash.replace('#', '');
+      switchTool(VALID_TOOLS.includes(initialHash) ? initialHash : 'battery-sizing');
+      recalculateAll();
+    };
+  </script>
+</body>
+</html>
